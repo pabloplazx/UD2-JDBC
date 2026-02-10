@@ -50,7 +50,7 @@ public class Conexion {
 			
 			Properties prop = new Properties();
 			try {
-				prop.load(Conexion.class.getClassLoader().getResourceAsStream("bd.properties"));
+				prop.load(Conexion.class.getClassLoader().getResourceAsStream("empresa_db.properties"));
 			} catch (IOException e) {
 				
 				e.printStackTrace();
