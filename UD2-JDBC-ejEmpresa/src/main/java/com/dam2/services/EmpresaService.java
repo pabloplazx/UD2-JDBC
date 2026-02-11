@@ -11,6 +11,11 @@ public class EmpresaService {
 	
 	EmpresaDao dao;
 	
+	public EmpresaService(EmpresaDao dao) {
+		super();
+		this.dao = dao;
+	}
+
 	public void creaDepartamento(Departamento dept) {
 		dao.crearDepartamento(dept);
 	}
