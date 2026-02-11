@@ -25,20 +25,29 @@ public class EmpresaDaoImpl implements EmpresaDao{
 
 	@Override
 	public void crearDepartamento(Departamento dept) {
-		
-		try (Statement sentencia = connection.createStatement()) {
-	        String sql = "INSERT INTO departamentos(id, nombre, ubicacion) "
-	                + "VALUES ('" + dept.getId()+ "','" 
-	                + dept.getNombre() + "'," // Coma, sin comilla de apertura siguient
-	                + dept.getUbicacion() + ")"; // Sin comillas y cerramos paréntesis
+	    
+	    // Fíjate en el lío de comillas.
+	    // Estructura: " ... VALUES ('" + variable + "', '" + variable + "')"
+	    
+	    try (Statement sentencia = connection.createStatement()) {
+	        
+	        String sql = "INSERT INTO departamentos (nombre, ubicacion) " +
+	                     "VALUES ('" + dept.getNombre() + "', '" + dept.getUbicacion() + "')";
+	        
+	        // Descomenta esto si quieres ver "la magia" (y el error) en la consola
+	        // System.out.println("SQL Generado: " + sql);
 	        
 	        sentencia.executeUpdate(sql);
-	        System.err.println("Departamento creado correctamente");
-		} catch (SQLException e) {
-			System.out.println("NO SE PUDO CREAR EL DEPARTAMENTO");
-			e.printStackTrace();
-		}
-		
+	        System.out.println("✅ Departamento creado correctamente");
+	        
+	    } catch (SQLException e) {
+	        // Reto 1: Capturar duplicados
+	        if (e.getErrorCode() == 1062) { // 1062 es el código de error de MySQL para "Duplicate entry"
+	            System.err.println("❌ Error: Ya existe un departamento con ese nombre.");
+	        } else {
+	            e.printStackTrace();
+	        }
+	    }
 	}
 
 
@@ -80,7 +89,7 @@ public class EmpresaDaoImpl implements EmpresaDao{
 				empleado.setNombre(registros.getString("nombre"));
 				empleado.setPuesto(registros.getString("puesto"));
 				empleado.setSalario(registros.getDouble("salario"));
-				empleado.setFechaAlta(registros.getDate("fecha_alto").toLocalDate());
+				empleado.setFechaAlta(registros.getDate("fecha_alta").toLocalDate());
 				empleado.setDepartamentoId(registros.getInt("dept_id"));
 				
 				empleados.add(empleado);

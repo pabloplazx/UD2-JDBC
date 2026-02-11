@@ -6,68 +6,39 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
-import javax.sql.DataSource;
-
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
-
 public class Conexion {
-	
-	//CLASE SINGLETON PARA OBTENER LA CONEXIÓN;
-	
-	static Connection con = null;
-	
-	static DataSource pool = null;
-	
-	public static Connection getConnection() {
-		if(con == null) {
-			Properties prop = new Properties();
-			try {
-				prop.load(Conexion.class.getClassLoader().getResourceAsStream("empresa_db.properties"));
-			} catch (IOException e) {
-				
-				e.printStackTrace();
-			}
-			
-			con = null;
-			try {
-				con = DriverManager
-						.getConnection(prop.getProperty("url"),
-								prop.getProperty("user"),
-								prop.getProperty("passwd"));
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		return con;
-	}
-	
-	public static DataSource getPool(){
-		
-		
-		if(pool == null) {
-			
-			Properties prop = new Properties();
-			try {
-				prop.load(Conexion.class.getClassLoader().getResourceAsStream("empresa_db.properties"));
-			} catch (IOException e) {
-				
-				e.printStackTrace();
-			}
-			
-			HikariConfig config = new HikariConfig();
-			config.setJdbcUrl(prop.getProperty("url"));
-			config.setUsername(prop.getProperty("user"));
-			config.setPassword(prop.getProperty("passwd"));
-			config.setMaximumPoolSize(10);      // máximo de conexiones
-			config.setMinimumIdle(2);           // conexiones mínimas a la espera
-			config.setConnectionTimeout(30000); // tiempo máx esperando conexión
 
-			pool = new HikariDataSource(config);
-		}
-		return pool;
-		
-	}
+    // Singleton simple: Una única conexión para toda la app
+    private static Connection con = null;
 
+    public static Connection getConnection() {
+        
+        // Si la conexión no existe o se ha cerrado, creamos una nueva
+        try {
+            if (con == null || con.isClosed()) {
+                
+                Properties prop = new Properties();
+                // Cargamos el fichero de propiedades
+                try {
+                    prop.load(Conexion.class.getClassLoader().getResourceAsStream("empresa_db.properties"));
+                } catch (IOException e) {
+                    System.err.println("❌ ERROR: No se encuentra el archivo 'empresa_db.properties'");
+                    e.printStackTrace();
+                    return null;
+                }
+
+                // Creamos la conexión directa (Sin Pool, Sin Hikari, Sin Logs molestos)
+                String url = prop.getProperty("url");
+                String user = prop.getProperty("user");
+                String pass = prop.getProperty("passwd");
+                
+                con = DriverManager.getConnection(url, user, pass);
+                // System.out.println("✅ Conexión establecida (Modo Clásico)");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return con;
+    }
 }
